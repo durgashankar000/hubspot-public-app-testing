@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const axios = require("axios");
 const { sendDealNotification } = require("./slackNotifier");
+const { tokenStore } = require("./oauthRouter");
 
 router.post("/deals", async (req, res) => {
 	try {
@@ -9,14 +11,42 @@ router.post("/deals", async (req, res) => {
 
 		for (const event of events) {
 			if (event.subscriptionType === "object.creation") {
+				const portalId = event.portalId;
+				const objectId = event.objectId;
+
+				// TokenStore se token lo
+				const tokens = tokenStore[portalId];
+				if (!tokens) {
+					console.log(`❌ Token nahi mila portal ${portalId} ke liye`);
+					continue;
+				}
+
+				// HubSpot API se deal details fetch karo
+				const dealResponse = await axios.get(
+					`https://api.hubapi.com/crm/v3/objects/deals/${objectId}`,
+					{
+						headers: {
+							Authorization: `Bearer ${tokens.access_token}`,
+						},
+						params: {
+							properties: "dealname,amount,dealstage",
+						},
+					},
+				);
+
+				const props = dealResponse.data.properties;
+
 				const deal = {
-					id: event.objectId,
-					name: event.properties?.dealname || "Naya Deal",
-					amount: event.properties?.amount || "N/A",
-					stage: event.properties?.dealstage || "N/A",
-					portalId: event.portalId, // ← portalId hai accountId nahi
+					id: objectId,
+					name: props.dealname || "Naya Deal",
+					amount: props.amount || "N/A",
+					stage: props.dealstage || "N/A",
+					portalId: portalId,
 				};
 
+				console.log("✅ Deal details:", deal);
+
+				// Slack me bhejo
 				await sendDealNotification(deal);
 			}
 		}
