@@ -20,6 +20,8 @@ app.use(
 );
 app.use("/oauth", oauthRouter);
 app.use("/contacts", contactRounter);
+app.use("/webhook", webhookRouter);
+
 
 app.get("/", (req, res) => {
 	res.json({ status: "ok", message: "Home response ok" });
@@ -29,7 +31,7 @@ app.get("/health", (req, res) => {
 	res.json({ status: "ok", message: "Backend working fine" });
 });
 
-app.use("/webhook", webhookRouter);
+
 
 const keepAlive = () => {
 	https
