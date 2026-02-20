@@ -43,4 +43,25 @@ const sendDealNotification = async (deal) => {
 	}
 };
 
-module.exports = { sendDealNotification };
+const sendDealDeleteNotification = async (deal) => {
+
+	try {
+		await webhook.send({
+			blocks:[
+				{
+					type: "header",
+					text:{
+						type: "plain_text",
+						text: `⚠️ ${deal.name} Deal Delete Hua! `
+					}
+				}
+			]
+		})
+		console.log("✅ Slack delete notification send hui!");
+	} catch (error) {
+		console.error("❌ Slack delete error:", error.message);	
+	}	
+
+}
+
+module.exports = { sendDealNotification, sendDealDeleteNotification };

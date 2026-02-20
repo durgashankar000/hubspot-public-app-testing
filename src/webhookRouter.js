@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
-const { sendDealNotification } = require("./slackNotifier");
+const { sendDealNotification, sendDealDeleteNotification } = require("./slackNotifier");
 const { getToken } = require("./oauthRouter");
 
 router.post("/deals", async (req, res) => {
@@ -10,14 +10,14 @@ router.post("/deals", async (req, res) => {
 		console.log("📩 Webhook aaya:", JSON.stringify(events, null, 2));
 
 		for (const event of events) {
+
+			// ── Deal Create ──
 			if (event.subscriptionType === "object.creation") {
 				const portalId = event.portalId;
 				const objectId = event.objectId;
 
-				// DB se token lo
 				const access_token = await getToken(portalId);
 
-				// Deal details fetch karo
 				const dealResponse = await axios.get(
 					`https://api.hubapi.com/crm/v3/objects/deals/${objectId}`,
 					{
@@ -36,12 +36,28 @@ router.post("/deals", async (req, res) => {
 					portalId: portalId,
 				};
 
-				console.log("✅ Deal details:", deal);
+				console.log("✅ Deal create details:", deal);
 				await sendDealNotification(deal);
+			}
+
+			// ── Deal Delete ──
+			if (event.subscriptionType === "object.deletion") {
+				const portalId = event.portalId;
+				const objectId = event.objectId;
+
+				// ✅ Delete ke baad API call nahi kar sakte
+				const deal = {
+					name: `Deal #${objectId}`,
+					portalId: portalId,
+				};
+
+				console.log("🗑️ Deal delete hua:", deal);
+				await sendDealDeleteNotification(deal);
 			}
 		}
 
 		res.status(200).json({ received: true });
+
 	} catch (error) {
 		console.error("❌ Webhook error:", error.message);
 		res.status(500).json({ error: error.message });

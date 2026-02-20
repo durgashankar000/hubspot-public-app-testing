@@ -7,7 +7,9 @@ const https = require("https");
 const oauthRouter = require("./oauthRouter");
 const contactRounter = require("./contactsRouter");
 const webhookRouter = require("./webhookRouter");
+const { connectDB } = require('./db');
 
+// connectDB();
 const app = express();
 
 app.use(express.json());
