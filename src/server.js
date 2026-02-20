@@ -1,11 +1,12 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const session = require('express-session');
+const session = require("express-session");
+const https = require("https");
 
 const oauthRouter = require("./oauthRouter");
 const contactRounter = require("./contactsRouter");
-const webhookRouter = require("./webhookRouter")
+const webhookRouter = require("./webhookRouter");
 
 const app = express();
 
@@ -17,23 +18,32 @@ app.use(
 		credentials: true,
 	}),
 );
-app.use('/oauth', oauthRouter)
-app.use('/contacts', contactRounter)
+app.use("/oauth", oauthRouter);
+app.use("/contacts", contactRounter);
 
-app.get('/', (req, res) => {
-    res.json({ status: 'ok', message : "Home response ok" })
-})
+app.get("/", (req, res) => {
+	res.json({ status: "ok", message: "Home response ok" });
+});
 
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', message : "Backend working fine" })
-})
+app.get("/health", (req, res) => {
+	res.json({ status: "ok", message: "Backend working fine" });
+});
 
-app.use('/webhook', webhookRouter)
+app.use("/webhook", webhookRouter);
 
+const keepAlive = () => {
+	https
+		.get(`https://hubspot-public-app-testing.onrender.com/`, (res) =>
+			console.log(`✅ Keep alive: ${res.statusCode}`),
+		)
+		.on("error", (err) => console.log("Keep alive error:", err));
+};
 
+// Har 10 dakike me ping karo
+setInterval(keepAlive, 10 * 60 * 1000);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT , ()=> {
-    console.log('Backend working fine')
-})
+app.listen(PORT, () => {
+	console.log("Backend working fine");
+});
