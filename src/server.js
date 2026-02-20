@@ -1,0 +1,34 @@
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const session = require('express-session');
+
+const oauthRouter = require("./oauthRouter");
+const contactRounter = require("./contactsRouter");
+
+const app = express();
+
+app.use(express.json());
+
+app.use(
+	cors({
+		origin: "*",
+		credentials: true,
+	}),
+);
+app.use('/oauth', oauthRouter)
+app.use('/contacts', contactRounter)
+
+app.get('/', (req, res) => {
+    res.json({ status: 'ok', message : "Home response ok" })
+})
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', message : "Backend working fine" })
+})
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT , ()=> {
+    console.log('Backend working fine')
+})
