@@ -31,6 +31,10 @@ app.get("/health", (req, res) => {
 	res.json({ status: "ok", message: "Backend working fine" });
 });
 
+app.post('/test', (req, res) => {
+  res.json({ received: true, body: req.body });
+});
+
 
 
 const keepAlive = () => {
