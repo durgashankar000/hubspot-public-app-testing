@@ -5,6 +5,7 @@ const session = require('express-session');
 
 const oauthRouter = require("./oauthRouter");
 const contactRounter = require("./contactsRouter");
+const webhookRouter = require("./webhookRouter")
 
 const app = express();
 
@@ -26,6 +27,10 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', message : "Backend working fine" })
 })
+
+app.use('/webhook', webhookRouter)
+
+
 
 const PORT = process.env.PORT || 3000;
 
