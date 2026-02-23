@@ -9,9 +9,7 @@ const contactRounter = require("./contactsRouter");
 const webhookRouter = require("./webhookRouter");
 const { connectDB } = require('./db');
 
-connectDB();
 const app = express();
-
 app.use(express.json());
 
 app.use(
@@ -20,6 +18,7 @@ app.use(
 		credentials: true,
 	}),
 );
+connectDB();
 app.use("/oauth", oauthRouter);
 app.use("/contacts", contactRounter);
 app.use("/webhook", webhookRouter);
